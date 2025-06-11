@@ -3,9 +3,12 @@
 namespace App\Livewire;
 
 use Livewire\Component;
-use App\Models\Bookmarks as Bookmark;
+use App\Models\Bookmark;
+use App\Notifications\AnnoyUser;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Bookmarks as ModelsBookmarks;
+
+
 
 class Bookmarks extends Component
 {
@@ -24,13 +27,25 @@ class Bookmarks extends Component
        ]);
 
     }
-    public function delete($id){
-    //  Auth::user()->bookmarks()->find($id)->delete();
-Bookmark::find($id)->delete();    
-}
-    public function mount(){
-        Auth::loginUsingId(2);
+     public function mount(){
+        Auth::loginUsingId(3);
     }
+
+    public function sendNotification(){
+        sleep(5);
+        Auth::user()->notify(new AnnoyUser());
+    }
+
+    public function delete($id){
+        //  Auth::user()->bookmarks()->find($id)->delete();
+        $bookmark=Bookmark::find($id);  
+        Log::info('Current User ID: ' . Auth::id());
+    Log::info('Bookmark Owner ID: ' . $bookmark->user_id);
+        $this->authorize('delete', $bookmark);
+    
+        $bookmark->delete();
+    }
+       
     public function render()
     {
         return view('livewire.bookmarks', ['bookmarks'=>Bookmark::all()]);
